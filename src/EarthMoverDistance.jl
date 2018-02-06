@@ -1,63 +1,93 @@
 module EarthMoverDistance
 
-using Distances
+
+using Distances # only required for default distance (cityblock)
 
 
-# add deps directory to the load path of dynamic libraries
+# number of flow operations reserved in the C flow array
+FLOW_ARRAY_SIZE = 128
+
+
+# add deps directory to the load path
 SO_PATH = joinpath(Pkg.dir("EarthMoverDistance"), "deps")
 if !in(SO_PATH, Libdl.DL_LOAD_PATH) # only add once
     push!(Libdl.DL_LOAD_PATH, SO_PATH)
 end
 
 
-immutable Signature
+# input type of the EMD implementation
+immutable CSignature
     num_features::Cint
     features::Ptr{Cfloat}
     weights::Ptr{Cfloat}
 end
 
-immutable Flow
+# flow output type of the EMD implementation
+immutable CFlow
     from::Cint
     to::Cint
     amount::Cfloat
 end
 
+# 'julian' flow type
+immutable Flow
+    from::Int64
+    to::Int64
+    amount::Float64
+end
+Base.convert(::Type{Flow}, cflow::CFlow) = Flow(cflow.from+1, cflow.to+1, cflow.amount)
 
-# ling2007efficient:
+
+# convert histogram array to CSignature
 # 
-# "Histograms can be viewed as a special type of signatures in that each histogram bin
-# corresponds to an element in a signature. In this view, the histogram values are treated
-# as the weights w_j in a signature S, and the grid locations (indices of bins) are treated
-# as positions m_j in S."
-Base.convert{T<:Number}(::Type{Signature}, array::AbstractArray{T,1}) =
-    Signature(length(array), pointer(convert(Array{Cfloat,1}, 1:length(array))),
-                             pointer(convert(Array{Cfloat,1}, array)))
+# ling2007efficient:  "Histograms can be viewed as a special type of signatures in that each
+# histogram bin corresponds to an element in a signature. In this view, the histogram values
+# are treated as the weights w_j in a signature S,  and the grid locations (indices of bins)
+# are treated as positions m_j in S."
+Base.convert{T<:Number}(::Type{CSignature}, array::AbstractArray{T,1}) =
+    CSignature(length(array), pointer(convert(Array{Cfloat,1}, 1:length(array))),
+                              pointer(convert(Array{Cfloat,1}, array)))
 
 
 """
-    emd(...)
+    emd(arr1, arr2, distance=Distances.cityblock)
 
-Compute the Earth Mover Distance
+Compute the Earth Mover Distance between the two histogram arrays. The `distance` function
+computes the distance between the levels of the histogram.
 """
-function emd(signature1::Signature, signature2::Signature, distance::Function)
+emd(any1, any2, distance::Function=cityblock) =
+    emd_flow(CSignature(any1), CSignature(any2), distance)[1] # only return EMD, drop flow
+
+"""
+    emd_flow(signature1, signature2, distance)
+
+Return a tuple of the Earth Mover Distance between the two signatures and an array of flow
+operations that induces the EMD. The `distance` function computes the distance between the
+levels of the histogram.
+"""
+function emd_flow(signature1::CSignature, signature2::CSignature, distance::Function)
     
     # create C function pointer to the distance function
     cfunctionpointer = cfunction(distance, Cfloat, (Ref{Cfloat}, Ref{Cfloat}))
-    flowsizeptr = Ref{Cint}(0)
-    flowptr = Ref(Flow(0, 0, 0.0)) # TODO Ref to array
+    cflowsizeptr = Ref{Cint}(0)
+    cflow = Array{CFlow}(FLOW_ARRAY_SIZE)
     
     # call the C function emd, returning a Cfloat that is cast to Float64
     res = ccall((:emd, :emd), # function name and library name
                 Cfloat,       # return type
-                (Ref{Signature}, Ref{Signature}, Ptr{Void}, Ref{Flow}, Ref{Cint}),        # argument types
-                Ref(signature1), Ref(signature2), cfunctionpointer, flowptr, flowsizeptr) # arguments
-    println(flowsizeptr[], " flow operations were needed")
-    println(flowptr[]) # TODO retrieve full array of flows
-    return convert(Float64, res)
+                (Ref{CSignature}, Ref{CSignature}, Ptr{Void}, Ref{CFlow}, Ref{Cint}),    # argument types
+                Ref(signature1), Ref(signature2), cfunctionpointer, cflow, cflowsizeptr) # arguments
+    
+    # read out the flow that induces the EMD
+    flowsize = cflowsizeptr[]
+    if flowsize > FLOW_ARRAY_SIZE
+        warn("Required $flowsize flow operations but only stored $FLOW_ARRAY_SIZE operations in array")
+    end
+    flow = map(Flow, cflow[1:min(flowsize, FLOW_ARRAY_SIZE)]) # convert to 'Julian' flow type
+    
+    return convert(Float64, res), flow # return tuple of EMD and flow
     
 end
-
-emd(any1, any2, distance::Function=cityblock) = emd(Signature(any1), Signature(any2), distance)
 
 
 end # module
