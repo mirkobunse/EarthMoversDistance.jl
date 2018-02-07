@@ -5,7 +5,7 @@ using Distances # only required for default distance (cityblock)
 
 
 # number of flow operations reserved in the C flow array
-FLOW_ARRAY_SIZE = 128
+FLOW_ARRAY_SIZE = 100 # max size of signature in emd library
 
 
 # add deps directory to the load path
@@ -79,11 +79,7 @@ function emd_flow(signature1::CSignature, signature2::CSignature, distance::Func
                 Ref(signature1), Ref(signature2), cfunctionpointer, cflow, cflowsizeptr) # arguments
     
     # read out the flow that induces the EMD
-    flowsize = cflowsizeptr[]
-    if flowsize > FLOW_ARRAY_SIZE
-        warn("Required $flowsize flow operations but only stored $FLOW_ARRAY_SIZE operations in array")
-    end
-    flow = map(Flow, cflow[1:min(flowsize, FLOW_ARRAY_SIZE)]) # convert to 'Julian' flow type
+    flow = map(Flow, cflow[1:min(cflowsizeptr[], FLOW_ARRAY_SIZE)]) # convert to 'Julian' flow type
     
     return convert(Float64, res), flow # return tuple of EMD and flow
     
