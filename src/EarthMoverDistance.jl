@@ -68,7 +68,8 @@ levels of the histogram.
 function emd_flow(signature1::CSignature, signature2::CSignature, distance::Function)
     
     # create C function pointer to the distance function
-    cfunctionpointer = cfunction(distance, Cfloat, (Ref{Cfloat}, Ref{Cfloat}))
+    cfunctionpointer = cfunction((x::Cfloat, y::Cfloat) -> convert(Cfloat, distance(x, y)),
+                                 Cfloat, (Ref{Cfloat}, Ref{Cfloat}))
     cflowsizeptr = Ref{Cint}(0)
     cflow = Array{CFlow}(FLOW_ARRAY_SIZE)
     
