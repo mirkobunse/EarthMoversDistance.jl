@@ -1,7 +1,7 @@
 module EarthMoverDistance
 
 
-using Distances # only required for default distance (cityblock)
+export emd, emd_flow
 
 
 # number of flow operations reserved in the C flow array
@@ -50,19 +50,19 @@ Base.convert{T<:Number}(::Type{CSignature}, array::AbstractArray{T,1}) =
 
 
 """
-    emd(arr1, arr2, distance=Distances.cityblock)
+    emd(arr1, arr2, distance)
 
 Compute the Earth Mover Distance between the two histogram arrays. The `distance` function
-computes the distance between the levels of the histogram.
+computes the distance between two levels of the histogram.
 """
-emd(any1, any2, distance::Function=cityblock) =
+emd(any1, any2, distance::Function) =
     emd_flow(CSignature(any1), CSignature(any2), distance)[1] # only return EMD, drop flow
 
 """
     emd_flow(signature1, signature2, distance)
 
 Return a tuple of the Earth Mover Distance between the two signatures and an array of flow
-operations that induces the EMD. The `distance` function computes the distance between the
+operations that induces the EMD. The `distance` function computes the distance between two
 levels of the histogram.
 """
 function emd_flow(signature1::CSignature, signature2::CSignature, distance::Function)

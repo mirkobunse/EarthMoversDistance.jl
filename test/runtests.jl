@@ -1,7 +1,10 @@
-using Base.Test, Distances, EarthMoverDistance, EarthMoverDistance.FLOW_ARRAY_SIZE
+using Base.Test, EarthMoverDistance, EarthMoverDistance.FLOW_ARRAY_SIZE
 
 # size of histogram arrays
 NUM_LEVELS = 16
+
+# cityblock distance
+cityblock = (x, y) -> abs(x - y)
 
 # simple case 1)
 # in each histogram, only one level is 1.0, the others are 0.0
@@ -15,7 +18,7 @@ for i in 1:NUM_LEVELS, j in 1:NUM_LEVELS
     
     # test cityblock distance
     dist = cityblock(i, j)
-    emd  = EarthMoverDistance.emd(histogram1, histogram2)
+    emd  = EarthMoverDistance.emd(histogram1, histogram2, cityblock)
     
     if dist != emd
         warn("Case 1 failing for cityblock distance with i = $i, j = $j")
@@ -37,7 +40,7 @@ for i in 1:NUM_LEVELS, j in 1:NUM_LEVELS, k in 1:NUM_LEVELS
     
     # test cityblock distance
     dist = cityblock(i, j) * 0.5 + cityblock(i, k) * 0.5
-    emd  = EarthMoverDistance.emd(histogram1, histogram2)
+    emd  = EarthMoverDistance.emd(histogram1, histogram2, cityblock)
     
     if dist != emd
         warn("Case 2 failing with i = $i, j = $j, k = $k")
