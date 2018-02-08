@@ -21,9 +21,9 @@ Clone this package from the Julia REPL:
 
       Pkg.clone("git://github.com/mirkobunse/EarthMoverDistance.jl.git")
 
-The EMD requires a measure of distance between signature features (e.g., the levels of a
-histogram). You can define your own distance measure as a function, or you can use the
-methods from the package `Distances.jl`.
+The EMD requires a measure of distance between signature features (the _ground distance_,
+e.g., between levels of a histogram). You can define your own distance measure as a
+function, or you can use the methods from the package `Distances.jl`.
 
       using EarthMoverDistance
       
