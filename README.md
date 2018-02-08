@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.org/mirkobunse/EarthMoverDistance.jl.svg?branch=master)](https://travis-ci.org/mirkobunse/EarthMoverDistance.jl)
+[![codecov](https://codecov.io/gh/mirkobunse/EarthMoverDistance.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/mirkobunse/EarthMoverDistance.jl)
+
 # EarthMoverDistance.jl
 
 This project wraps the original implementation of the Earth Mover Distance (EMD) by Rubner
