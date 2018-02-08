@@ -37,9 +37,17 @@ function, or you can use the methods from the package `Distances.jl`.
 In the above example, the values of `x` and `y` will be the indices of the two histograms.
 
 
-### Limitations
+### Limitations and Future Work
 
 Currently, only the EMD between one-dimensional histograms is computed.
 However, the project is easily extensible - Feel free to contribute!
 Only little Julia skills are needed.
+
+I only tested this package on Linux. I would highly appreciate your support in making it
+work on the other platforms, as well!
+
+Since Rubner's paper, several algorithms computing the EMD have been proposed.
+Most of them are limited to special cases, but tremendously improve on efficiency.
+Who would not love to see some native Julia implementations of these algorithms?
+`EarthMoverDistance.jl` can help in testing these during development.
 
