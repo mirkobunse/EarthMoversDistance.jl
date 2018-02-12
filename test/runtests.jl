@@ -48,3 +48,50 @@ for i in 1:NUM_LEVELS, j in 1:NUM_LEVELS, k in 1:NUM_LEVELS
     @test dist == emd
     
 end
+
+# case 3: random histograms with single flow)
+for i in 1:100 # test hundred times
+    histogram1 = rand(Float64, NUM_LEVELS)
+    histogram2 = copy(histogram1)
+    
+    from = rand(1:NUM_LEVELS)
+    to   = rand(setdiff(1:NUM_LEVELS, [from]))
+    flow = rand(Float64) * min(histogram2[from], 1 - histogram2[to])
+    histogram2[from] = histogram2[from] - flow
+    histogram2[to]   = histogram2[to]   + flow
+    cost = flow * cityblock(from, to)
+
+    emd  = EarthMoversDistance.emd(histogram1, histogram2, cityblock)
+    upperbound = cost / sum(histogram1) # only upper bound because min flow could come from elsewhere
+    if emd > upperbound && !isapprox(emd, upperbound, atol=1e-6)
+        println(histogram1)
+        println("$from -> $to: $flow")
+        println(histogram2)
+        println("Case 3 failing with EMD $emd (upper bound $upperbound, difference $(emd-upperbound))")
+    end
+    @test emd <= upperbound || isapprox(emd, upperbound, atol=1e-6)
+end
+
+# case 4: random histograms with 10 flows)
+for i in 1:100 # test hundred times
+    histogram1 = rand(Float64, NUM_LEVELS)
+    histogram2 = copy(histogram1)
+    totalcost  = 0.0
+    
+    for j in 1:10
+        from = rand(1:NUM_LEVELS)
+        to   = rand(setdiff(1:NUM_LEVELS, [from]))
+        flow = rand(Float64) * min(histogram2[from], 1 - histogram2[to])
+        histogram2[from] = histogram2[from] - flow
+        histogram2[to]   = histogram2[to]   + flow
+        totalcost += flow * cityblock(from, to)
+    end
+
+    emd  = EarthMoversDistance.emd(histogram1, histogram2, cityblock)
+    upperbound = totalcost / sum(histogram1)
+    if emd > upperbound && !isapprox(emd, upperbound, atol=1e-6)
+        println("Case 4 failing with EMD $emd (upper bound $upperbound, difference $(emd-upperbound))")
+    end
+    @test emd <= upperbound || isapprox(emd, upperbound, atol=1e-6)
+end
+
