@@ -1,13 +1,13 @@
 # 
-# EarthMoverDistance.jl
+# EarthMoversDistance.jl
 # Copyright 2018 Mirko Bunse
 # 
 # 
-# This package wraps the original implementation of the Earth Mover Distance (EMD)
+# This package wraps the original implementation of the Earth Mover's Distance (EMD)
 # by Rubner et. al.
 # 
 # 
-# EarthMoverDistance.jl is free software: you can redistribute it and/or modify
+# EarthMoversDistance.jl is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
@@ -18,12 +18,12 @@
 # GNU General Public License for more details.
 # 
 # You should have received a copy of the GNU General Public License
-# along with EarthMoverDistance.jl.  If not, see <http://www.gnu.org/licenses/>.
+# along with EarthMoversDistance.jl.  If not, see <http://www.gnu.org/licenses/>.
 # 
 # 
 # The original implementation wrapped here remains courtesy of its authors.
 # 
-module EarthMoverDistance
+module EarthMoversDistance
 
 
 export emd, emd_flow
@@ -34,7 +34,7 @@ FLOW_ARRAY_SIZE = 100 # max size of signature in emd library
 
 
 # add deps directory to the load path
-SO_PATH = joinpath(Pkg.dir("EarthMoverDistance"), "deps")
+SO_PATH = joinpath(Pkg.dir("EarthMoversDistance"), "deps")
 if !in(SO_PATH, Libdl.DL_LOAD_PATH) # only add once
     push!(Libdl.DL_LOAD_PATH, SO_PATH)
 end
@@ -64,11 +64,6 @@ Base.convert(::Type{Flow}, cflow::CFlow) = Flow(cflow.from+1, cflow.to+1, cflow.
 
 
 # convert histogram array to CSignature
-# 
-# ling2007efficient:  "Histograms can be viewed as a special type of signatures in that each
-# histogram bin corresponds to an element in a signature. In this view, the histogram values
-# are treated as the weights w_j in a signature S,  and the grid locations (indices of bins)
-# are treated as positions m_j in S."
 Base.convert{T<:Number}(::Type{CSignature}, array::AbstractArray{T,1}) =
     CSignature(length(array), pointer(convert(Array{Cfloat,1}, 1:length(array))),
                               pointer(convert(Array{Cfloat,1}, array)))
@@ -77,7 +72,7 @@ Base.convert{T<:Number}(::Type{CSignature}, array::AbstractArray{T,1}) =
 """
     emd(arr1, arr2, distance)
 
-Compute the Earth Mover Distance between the two histogram arrays. The `distance` function
+Compute the Earth Mover's Distance between the two histogram arrays. The `distance` function
 computes the distance between two levels of the histogram.
 """
 emd(any1, any2, distance::Function) =
@@ -86,7 +81,7 @@ emd(any1, any2, distance::Function) =
 """
     emd_flow(signature1, signature2, distance)
 
-Return a tuple of the Earth Mover Distance between the two signatures and an array of flow
+Return a tuple of the Earth Mover's Distance between the two signatures and an array of flow
 operations that induces the EMD. The `distance` function computes the distance between two
 levels of the histogram.
 """

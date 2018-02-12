@@ -1,6 +1,6 @@
-The ComfyBase.jl package is licensed under the GNU General Public License, version 3.
+The EarthMoversDistance.jl package is licensed under the GNU General Public License, version 3.
 
-Copyright 2017 Mirko Bunse.
+Copyright 2018 Mirko Bunse.
 
 
 

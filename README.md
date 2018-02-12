@@ -1,9 +1,9 @@
-[![Build Status](https://travis-ci.org/mirkobunse/EarthMoverDistance.jl.svg?branch=master)](https://travis-ci.org/mirkobunse/EarthMoverDistance.jl)
-[![codecov](https://codecov.io/gh/mirkobunse/EarthMoverDistance.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/mirkobunse/EarthMoverDistance.jl)
+[![Build Status](https://travis-ci.org/mirkobunse/EarthMoversDistance.jl.svg?branch=master)](https://travis-ci.org/mirkobunse/EarthMoversDistance.jl)
+[![codecov](https://codecov.io/gh/mirkobunse/EarthMoversDistance.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/mirkobunse/EarthMoversDistance.jl)
 
-# EarthMoverDistance.jl
+# EarthMoversDistance.jl
 
-This project wraps the original implementation of the Earth Mover Distance (EMD) by Rubner
+This project wraps the original implementation of the Earth Mover's Distance (EMD) by Rubner
 et. al. for Julia.
 
 Please cite the original paper if you use this project:
@@ -22,17 +22,17 @@ Please cite the original paper if you use this project:
 
 Clone this package from the Julia REPL:
 
-      Pkg.clone("git://github.com/mirkobunse/EarthMoverDistance.jl.git")
+      Pkg.clone("git://github.com/mirkobunse/EarthMoversDistance.jl.git")
 
 The EMD requires a measure of distance between signature features (the _ground distance_,
 e.g., between levels of a histogram). You can define your own distance measure as a
 function, or you can use the methods from the package `Distances.jl`.
 
-      using EarthMoverDistance
+      using EarthMoversDistance
       
       histogram1 = rand(8)
       histogram2 = rand(8)
-      emd(histogram1, histogram2, (x, y) -> abs(x - y)) # custom distance function
+      emd(histogram1, histogram2, (x, y) -> abs(x - y)) # custom ground distance function
       
       using Distances
       emd(histogram1, histogram2, cityblock) # distance function from the Distances package
@@ -52,5 +52,5 @@ work on the other platforms, as well!
 Since Rubner's paper, several algorithms computing the EMD have been proposed.
 Most of them are limited to special cases, but tremendously improve on efficiency.
 Who would not love to see some native Julia implementations of these algorithms?
-`EarthMoverDistance.jl` can help in testing these during development.
+`EarthMoversDistance.jl` can help in testing these during development.
 
