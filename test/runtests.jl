@@ -1,4 +1,4 @@
-using Base.Test, EarthMoversDistance, EarthMoversDistance.FLOW_ARRAY_SIZE
+using Test, EarthMoversDistance
 
 # size of histogram arrays
 NUM_LEVELS = 16
@@ -21,7 +21,7 @@ for i in 1:NUM_LEVELS, j in 1:NUM_LEVELS
     emd  = EarthMoversDistance.emd(histogram1, histogram2, cityblock)
     
     if dist != emd
-        warn("Case 1 failing for cityblock distance with i = $i, j = $j")
+        @warn "Case 1 failing" i j
     end
     @test dist == emd
     
@@ -43,7 +43,7 @@ for i in 1:NUM_LEVELS, j in 1:NUM_LEVELS, k in 1:NUM_LEVELS
     emd  = EarthMoversDistance.emd(histogram1, histogram2, cityblock)
     
     if dist != emd
-        warn("Case 2 failing with i = $i, j = $j, k = $k")
+        @warn "Case 2 failing" i j k
     end
     @test dist == emd
     
@@ -67,7 +67,7 @@ for i in 1:100 # test hundred times
         println(histogram1)
         println("$from -> $to: $flow")
         println(histogram2)
-        println("Case 3 failing with EMD $emd (upper bound $upperbound, difference $(emd-upperbound))")
+        @warn "Case 3 failing" emd upperbound emd-upperbound
     end
     @test emd <= upperbound || isapprox(emd, upperbound, atol=1e-6)
 end
@@ -90,7 +90,7 @@ for i in 1:100 # test hundred times
     emd  = EarthMoversDistance.emd(histogram1, histogram2, cityblock)
     upperbound = totalcost / sum(histogram1)
     if emd > upperbound && !isapprox(emd, upperbound, atol=1e-6)
-        println("Case 4 failing with EMD $emd (upper bound $upperbound, difference $(emd-upperbound))")
+        @warn "Case 4 failing" emd upperbound emd-upperbound
     end
     @test emd <= upperbound || isapprox(emd, upperbound, atol=1e-6)
 end

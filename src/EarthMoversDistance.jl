@@ -26,47 +26,51 @@
 module EarthMoversDistance
 
 
+using Libdl
+
 export emd, emd_flow
 
-
-# number of flow operations reserved in the C flow array
-FLOW_ARRAY_SIZE = 100 # max size of signature in emd library
+FLOW_ARRAY_SIZE = 100 # flow operations reserved in C array = max size of signature
 
 
 # add deps directory to the load path
-SO_PATH = joinpath(Pkg.dir("EarthMoversDistance"), "deps")
-if !in(SO_PATH, Libdl.DL_LOAD_PATH) # only add once
-    push!(Libdl.DL_LOAD_PATH, SO_PATH)
+function __init__()
+    libpath = joinpath(dirname(pathof(@__MODULE__)), "..", "deps")
+    if !in(libpath, Libdl.DL_LOAD_PATH) # only add once
+        push!(Libdl.DL_LOAD_PATH, libpath)
+    end
 end
 
 
 # input type of the EMD implementation
-immutable CSignature
+struct CSignature
     num_features::Cint
     features::Ptr{Cfloat}
     weights::Ptr{Cfloat}
 end
+CSignature(array::AbstractArray{T,1}) where T<:Number =
+    CSignature(length(array), pointer(convert(Array{Cfloat,1}, 1:length(array))),
+                              pointer(convert(Array{Cfloat,1}, array)))
 
 # flow output type of the EMD implementation
-immutable CFlow
+struct CFlow
     from::Cint
     to::Cint
     amount::Cfloat
 end
 
 # 'julian' flow type
-immutable Flow
+struct Flow
     from::Int64
     to::Int64
     amount::Float64
 end
-Base.convert(::Type{Flow}, cflow::CFlow) = Flow(cflow.from+1, cflow.to+1, cflow.amount)
+Flow(cflow::CFlow) = Flow(cflow.from+1, cflow.to+1, cflow.amount)
 
 
-# convert histogram array to CSignature
-Base.convert{T<:Number}(::Type{CSignature}, array::AbstractArray{T,1}) =
-    CSignature(length(array), pointer(convert(Array{Cfloat,1}, 1:length(array))),
-                              pointer(convert(Array{Cfloat,1}, array)))
+# conversions
+Base.convert(::Type{Flow}, cflow::CFlow) = Flow(cflow)
+Base.convert(::Type{CSignature}, array::AbstractArray{T,1}) where T<:Number = CSignature(array)
 
 
 """
@@ -88,15 +92,14 @@ levels of the histogram.
 function emd_flow(signature1::CSignature, signature2::CSignature, distance::Function)
     
     # create C function pointer to the distance function
-    cfunctionpointer = cfunction((x::Cfloat, y::Cfloat) -> convert(Cfloat, distance(x, y)),
-                                 Cfloat, (Ref{Cfloat}, Ref{Cfloat}))
+    cfunctionpointer = @cfunction $distance Cfloat (Ref{Cfloat}, Ref{Cfloat})
     cflowsizeptr = Ref{Cint}(0)
-    cflow = Array{CFlow}(FLOW_ARRAY_SIZE)
+    cflow = Array{CFlow}(undef, FLOW_ARRAY_SIZE)
     
     # call the C function emd, returning a Cfloat that is cast to Float64
     res = ccall((:emd, :emd), # function name and library name
                 Cfloat,       # return type
-                (Ref{CSignature}, Ref{CSignature}, Ptr{Void}, Ref{CFlow}, Ref{Cint}),    # argument types
+                (Ref{CSignature}, Ref{CSignature}, Ptr{Nothing}, Ref{CFlow}, Ref{Cint}), # argument types
                 Ref(signature1), Ref(signature2), cfunctionpointer, cflow, cflowsizeptr) # arguments
     
     # read out the flow that induces the EMD
