@@ -15,7 +15,6 @@ git:
 matrix:
   allow_failures:
   - julia: nightly
-  - os: osx
 
 # push coverage results to Codecov
 after_success:
