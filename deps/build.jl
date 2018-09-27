@@ -9,8 +9,8 @@ rm("src", force=true, recursive=true)
 mkdir("src")
 run(`wget --directory-prefix=src/ $HEADER_URL $IMPLEMENTATION_URL`)
 
-# feature type should be float
-run(`sed -i 's/typedef int feature_t;/typedef float feature_t;/g' src/emd.h`)
+# feature type should be float (funny -i'' works on both Linux and Mac)
+run(`sed -i\'\' 's/typedef int feature_t;/typedef float feature_t;/g' src/emd.h`)
 
 # create a shared library: compile and link
 run(`gcc -Wall -fpic -shared -o emd.so src/emd.c`)
