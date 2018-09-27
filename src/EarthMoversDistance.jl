@@ -35,7 +35,11 @@ FLOW_ARRAY_SIZE = 100 # flow operations reserved in C array = max size of signat
 
 # add deps directory to the load path
 function __init__()
-    libpath = joinpath(dirname(pathof(@__MODULE__)), "..", "deps")
+    libpath = normpath(dirname(pathof(@__MODULE__)), "..", "deps")
+    libfile = joinpath(libpath, "emd.so")
+    if !isfile(libfile)
+        error("Could not find $libfile. Check the build.log for an error during the build.")
+    end
     if !in(libpath, Libdl.DL_LOAD_PATH) # only add once
         push!(Libdl.DL_LOAD_PATH, libpath)
     end
