@@ -1,10 +1,10 @@
-using Test, EarthMoversDistance
+using Test, Distances, EarthMoversDistance
 
 # size of histogram arrays
 NUM_LEVELS = 16
 
-# cityblock distance
-cityblock = (x, y) -> abs(x - y)
+# cityblock distance from Distances.jl
+cityblock = Cityblock() # (x, y) -> abs(x - y)
 
 # simple case 1)
 # in each histogram, only one level is 1.0, the others are 0.0
@@ -17,7 +17,7 @@ for i in 1:NUM_LEVELS, j in 1:NUM_LEVELS
     histogram2[j] = 1.0
     
     # test cityblock distance
-    dist = cityblock(i, j)
+    dist = evaluate(cityblock, i, j)
     emd  = EarthMoversDistance.emd(histogram1, histogram2, cityblock)
     
     if dist != emd
@@ -39,7 +39,7 @@ for i in 1:NUM_LEVELS, j in 1:NUM_LEVELS, k in 1:NUM_LEVELS
     histogram2[k] = 0.5
     
     # test cityblock distance
-    dist = cityblock(i, j) * 0.5 + cityblock(i, k) * 0.5
+    dist = evaluate(cityblock, i, j) * 0.5 + evaluate(cityblock, i, k) * 0.5
     emd  = EarthMoversDistance.emd(histogram1, histogram2, cityblock)
     
     if dist != emd
@@ -59,7 +59,7 @@ for i in 1:100 # test hundred times
     flow = rand(Float64) * min(histogram2[from], 1 - histogram2[to])
     histogram2[from] = histogram2[from] - flow
     histogram2[to]   = histogram2[to]   + flow
-    cost = flow * cityblock(from, to)
+    cost = flow * evaluate(cityblock, from, to)
 
     emd  = EarthMoversDistance.emd(histogram1, histogram2, cityblock)
     upperbound = cost / sum(histogram1) # only upper bound because min flow could come from elsewhere
@@ -84,7 +84,7 @@ for i in 1:100 # test hundred times
         flow = rand(Float64) * min(histogram2[from], 1 - histogram2[to])
         histogram2[from] = histogram2[from] - flow
         histogram2[to]   = histogram2[to]   + flow
-        totalcost += flow * cityblock(from, to)
+        totalcost += flow * evaluate(cityblock, from, to)
     end
 
     emd  = EarthMoversDistance.emd(histogram1, histogram2, cityblock)
