@@ -18,4 +18,4 @@ matrix:
 
 # push coverage results to Codecov
 after_success:
-  - julia -e 'cd(Pkg.dir("EarthMoversDistance")); Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder())'
+  - julia -e 'using Pkg; cd(Pkg.dir("EarthMoversDistance")); Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder())'
