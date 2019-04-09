@@ -26,22 +26,25 @@ Clone this package from the Julia REPL (version 0.7 and above):
 
 ```julia
 using Pkg
-Pkg.clone("https://github.com/mirkobunse/EarthMoversDistance.jl.git")
+Pkg.add(PackageSpec(url="https://github.com/mirkobunse/EarthMoversDistance.jl.git", rev="master"))
 ```
 
 The EMD requires a measure of distance between signature features (the _ground distance_,
 e.g., between levels of a histogram). You can define your own distance measure as a
-function, or you can use the methods from [Distances.jl](https://github.com/JuliaStats/Distances.jl).
+function, or you can use objects from [Distances.jl](https://github.com/JuliaStats/Distances.jl)
+types.
 
 ```julia
 using EarthMoversDistance
 
 histogram1 = rand(8)
 histogram2 = rand(8)
-emd(histogram1, histogram2, (x, y) -> abs(x - y)) # custom ground distance function
+earthmovers(histogram1, histogram2, (x, y) -> abs(x - y)) # custom ground distance function
 
 using Distances
-emd(histogram1, histogram2, cityblock) # distance function from the Distances package
+earthmovers(histogram1, histogram2, Cityblock()) # distance object from Distances.jl
+
+emd = EarthMovers(Cityblock()) # create a distance object to be used in Distances.evaluate()
 ```
 
 In the above example, the values of `x` and `y` will be the indices of the two histograms.
@@ -56,4 +59,3 @@ Since Rubner's paper, several algorithms computing the EMD have been proposed.
 Most of them are limited to special cases, but tremendously improve on efficiency.
 Who would not love to see some native Julia implementations of these algorithms?
 EarthMoversDistance.jl can help in testing these during development.
-

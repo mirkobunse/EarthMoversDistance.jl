@@ -27,7 +27,7 @@ module EarthMoversDistance
 
 using Distances
 
-export EarthMovers, evaluate, emd, emd_flow
+export EarthMovers, evaluate, earthmovers, earthmovers_flow
 include("wrapper.jl") # wrap the C implementation to be called in Julia
 
 
@@ -46,28 +46,33 @@ end
 
 # implement the interface of Distances.jl - emd_flow is defined in wrapper.jl
 Distances.evaluate(dist::EarthMovers, a::AbstractVector{T}, b::AbstractVector{T}) where {T<:Number} =
-  emd_flow(a, b, dist.ground_distance)[1] # only return EMD, drop flow
+  earthmovers_flow(a, b, dist.ground_distance)[1] # only return EMD, drop flow
 
 
 """
-    emd(a, b, ground_distance::Union{Function, PreMetric})
+    earthmovers(a, b, ground_distance::Union{Function, PreMetric})
 
 Evaluate the Earth Mover's Distance (EMD) semi-metric between signatures `a` and `b`.
 
 The EMD is defined over a `ground_distance` which computes the distance between elements
 of signatures `a` and `b`, e.g. between the levels of two histograms.
 """
-emd(a::AbstractVector{T}, b::AbstractVector{T}, g::Function) where {T<:Number} =
+earthmovers(a::AbstractVector{T}, b::AbstractVector{T}, g::Function) where {T<:Number} =
   evaluate(EarthMovers(g), a, b) # shorthand
 
 
 # allow PreMetric arguments instead of Function arguments
 convert(::Type{Function}, g::PreMetric) = (ai, bi) -> evaluate(g, ai, bi) # conversion
 EarthMovers(g::PreMetric) = EarthMovers(convert(Function, g)) # constructor
-emd(a::AbstractVector{T}, b::AbstractVector{T}, g::PreMetric) where {T<:Number} =
-  emd(a, b, convert(Function, g))
-emd_flow(a::AbstractVector{T}, b::AbstractVector{T}, g::PreMetric) where {T<:Number} =
-  emd_flow(a, b, convert(Function, g))
+earthmovers(a::AbstractVector{T}, b::AbstractVector{T}, g::PreMetric) where {T<:Number} =
+  earthmovers(a, b, convert(Function, g))
+earthmovers_flow(a::AbstractVector{T}, b::AbstractVector{T}, g::PreMetric) where {T<:Number} =
+  earthmovers_flow(a, b, convert(Function, g))
+
+
+# mark deprecations
+@deprecate emd      earthmovers
+@deprecate emd_flow earthmovers_flow
 
 
 end # module

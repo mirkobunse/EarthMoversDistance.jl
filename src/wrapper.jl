@@ -71,7 +71,7 @@ convert(::Type{CSignature}, array::AbstractVector{T}) where {T<:Number} =
 
 
 # implement the wrapping
-function emd_flow(a::CSignature, b::CSignature, g::Function)
+function earthmovers_flow(a::CSignature, b::CSignature, g::Function)
     
     # create C function pointer to the ground distance function g
     cfunctionpointer = @cfunction $g Cfloat (Ref{Cfloat}, Ref{Cfloat})
@@ -94,16 +94,16 @@ end
 
 
 # make the wrapper accessible with standard argument types
-emd_flow(a::AbstractVector{T}, b::AbstractVector{T}, g::Function) where {T<:Number} =
-  emd_flow(convert(CSignature, a), convert(CSignature, b), g)
+earthmovers_flow(a::AbstractVector{T}, b::AbstractVector{T}, g::Function) where {T<:Number} =
+  earthmovers_flow(convert(CSignature, a), convert(CSignature, b), g)
 
 
 @doc """
-    emd_flow(a, b, ground_distance::Union{PreMetric, Function})
+    earthmovers_flow(a, b, ground_distance::Union{PreMetric, Function})
 
 Return a tuple `(d, F)` of the Earth Mover's Distance `d` between the two signatures `a` and `b`
 and an array `F` of flow operations that induces `d`.
 
 The EMD is defined over a `ground_distance` which computes the distance between elements
 of signatures `a` and `b`, e.g. between the levels of two histograms.
-""" emd_flow # also provide documentation
+""" earthmovers_flow # also provide documentation

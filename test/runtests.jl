@@ -18,7 +18,7 @@ for i in 1:NUM_LEVELS, j in 1:NUM_LEVELS
     
     # test cityblock distance
     dist = evaluate(cityblock, i, j)
-    emd  = EarthMoversDistance.emd(histogram1, histogram2, cityblock)
+    emd  = EarthMoversDistance.earthmovers(histogram1, histogram2, cityblock)
     
     if dist != emd
         @warn "Case 1 failing" i j
@@ -40,7 +40,7 @@ for i in 1:NUM_LEVELS, j in 1:NUM_LEVELS, k in 1:NUM_LEVELS
     
     # test cityblock distance
     dist = evaluate(cityblock, i, j) * 0.5 + evaluate(cityblock, i, k) * 0.5
-    emd  = EarthMoversDistance.emd(histogram1, histogram2, cityblock)
+    emd  = EarthMoversDistance.earthmovers(histogram1, histogram2, cityblock)
     
     if dist != emd
         @warn "Case 2 failing" i j k
@@ -61,7 +61,7 @@ for i in 1:100 # test hundred times
     histogram2[to]   = histogram2[to]   + flow
     cost = flow * evaluate(cityblock, from, to)
 
-    emd  = EarthMoversDistance.emd(histogram1, histogram2, cityblock)
+    emd  = EarthMoversDistance.earthmovers(histogram1, histogram2, cityblock)
     upperbound = cost / sum(histogram1) # only upper bound because min flow could come from elsewhere
     if emd > upperbound && !isapprox(emd, upperbound, atol=1e-6)
         println(histogram1)
@@ -87,7 +87,7 @@ for i in 1:100 # test hundred times
         totalcost += flow * evaluate(cityblock, from, to)
     end
 
-    emd  = EarthMoversDistance.emd(histogram1, histogram2, cityblock)
+    emd  = EarthMoversDistance.earthmovers(histogram1, histogram2, cityblock)
     upperbound = totalcost / sum(histogram1)
     if emd > upperbound && !isapprox(emd, upperbound, atol=1e-6)
         @warn "Case 4 failing" emd upperbound emd-upperbound
