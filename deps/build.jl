@@ -9,7 +9,8 @@ rm("src", force=true, recursive=true)
 
 # download the source files
 mkdir("src")
-run(`wget --directory-prefix=src/ $HEADER_URL $IMPLEMENTATION_URL`)
+download(HEADER_URL,         "src/" * basename(HEADER_URL))
+download(IMPLEMENTATION_URL, "src/" * basename(IMPLEMENTATION_URL))
 
 # feature type should be float (funny -i'' works on both Linux and Mac)
 run(`sed -i\'\' 's/typedef int feature_t;/typedef float feature_t;/g' src/emd.h`)
